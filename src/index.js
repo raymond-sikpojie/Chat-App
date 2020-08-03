@@ -14,9 +14,21 @@ const server = http.createServer(app);
 // Initialize socket
 const io = socketio(server);
 
+let count = 0;
+
 // Add eventListener to io
-io.on("connection", () => {
+io.on("connection", (socket) => {
   console.log("New web socket connection");
+
+  // socket.emit("countUpdated", count);
+
+  io.emit("countUpdated", count);
+
+  // listen for an event
+  socket.on("increment", () => {
+    count++;
+    io.emit("countUpdated", count);
+  });
 });
 
 // Serve static assets
