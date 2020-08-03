@@ -8,32 +8,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve static assets
+const publicDirectoryPath = path.join(__dirname, "../public");
+app.use(express.static(publicDirectoryPath));
+
 // Create server for socket io
 const server = http.createServer(app);
 
 // Initialize socket
 const io = socketio(server);
 
-let count = 0;
-
 // Add eventListener to io
 io.on("connection", (socket) => {
   console.log("New web socket connection");
 
-  // socket.emit("countUpdated", count);
+  socket.emit("message", "Welcome!");
 
-  io.emit("countUpdated", count);
-
-  // listen for an event
-  socket.on("increment", () => {
-    count++;
-    io.emit("countUpdated", count);
+  socket.on("sendMessage", (message) => {
+    io.emit("message", message);
   });
 });
-
-// Serve static assets
-const publicDirectoryPath = path.join(__dirname, "../public");
-app.use(express.static(publicDirectoryPath));
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

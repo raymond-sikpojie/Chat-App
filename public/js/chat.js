@@ -1,15 +1,15 @@
 // Initialize conncetion
 const socket = io();
 
-// Listen for an event
-socket.on("countUpdated", (count) => {
-  console.log("The count has been updated", count);
+socket.on("message", (message) => {
+  console.log(message);
 });
 
-// Get button
-document.querySelector("#increment").addEventListener("click", () => {
-  console.log("clicked");
+let text = document.querySelector("#message");
+document.querySelector("#form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  let message = text.value;
 
-  // Create an event which will be listened for on the server
-  socket.emit("increment");
+  socket.emit("sendMessage", message);
+  text.value = "";
 });
