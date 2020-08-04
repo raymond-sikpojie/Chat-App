@@ -11,6 +11,30 @@ const messages = document.querySelector("#messages");
 // Templates
 const messageTemplate = document.querySelector("#message-template").innerHTML;
 const locationTemplate = document.querySelector("#location-template").innerHTML;
+const sidebarTemplate = document.querySelector("#sidebar-template").innerHTML;
+
+const autoscroll = () => {
+  // New message element
+  const newMessage = messages.lastElementChild;
+
+  // Get height of new message
+  const newMessageStyles = getComputedStyle(newMessage);
+  const newMessageMargin = parseInt(newMessageStyles.marginBottom);
+  const newMessageHeight = newMessage.offsetHeight + newMessageMargin;
+
+  // Visible height
+  const visibleHeight = messages.offsetHeight;
+
+  // Height of messages container
+  const containerHeight = messages.scrollHeight;
+
+  // How far have I scrolled
+  const scrollOffset = messages.scrollTop + visibleHeight;
+
+  if (containerHeight - newMessageHeight <= scrollOffset) {
+    messages.scrollTop = messages.scrollHeight;
+  }
+};
 
 // Add "message" event listener
 socket.on("message", (message) => {
@@ -18,10 +42,12 @@ socket.on("message", (message) => {
 
   // Add messages to the div which will contain dynamic content
   const html = Mustache.render(messageTemplate, {
+    username: message.username,
     message: message.text,
     createdAt: moment(message.createdAt).format("h:mm a"),
   });
   messages.insertAdjacentHTML("beforeend", html);
+  autoscroll();
 });
 
 // Add "locationMessage" event listener
@@ -29,10 +55,20 @@ socket.on("locationMessage", (message) => {
   // console.log(message);
 
   const html = Mustache.render(locationTemplate, {
+    username: message.username,
     url: message.url,
     createdAt: moment(message.createdAt).format("h:mm a"),
   });
   messages.insertAdjacentHTML("beforeend", html);
+  autoscroll();
+});
+
+socket.on("roomData", ({ room, users }) => {
+  const html = Mustache.render(sidebarTemplate, {
+    room,
+    users,
+  });
+  document.querySelector("#sidebar").innerHTML = html;
 });
 
 // Add event listener
@@ -84,4 +120,16 @@ sendLocation.addEventListener("click", (e) => {
       console.log("Location shared");
     });
   });
+});
+
+// when user joins a room
+// Options (using the qs library)
+const { username, room } = Qs.parse(location.search, {
+  ignoreQueryPrefix: true,
+});
+socket.emit("join", { username, room }, (error) => {
+  if (error) {
+    alert(error);
+    location.href = "/";
+  }
 });
