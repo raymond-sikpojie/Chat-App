@@ -10,12 +10,27 @@ const messages = document.querySelector("#messages");
 
 // Templates
 const messageTemplate = document.querySelector("#message-template").innerHTML;
+const locationTemplate = document.querySelector("#location-template").innerHTML;
 
 // Add "message" event listener
 socket.on("message", (message) => {
-  console.log(message);
+  // console.log(message);
+
+  // Add messages to the div which will contain dynamic content
   const html = Mustache.render(messageTemplate, {
-    message,
+    message: message.text,
+    createdAt: moment(message.createdAt).format("h:mm a"),
+  });
+  messages.insertAdjacentHTML("beforeend", html);
+});
+
+// Add "locationMessage" event listener
+socket.on("locationMessage", (message) => {
+  // console.log(message);
+
+  const html = Mustache.render(locationTemplate, {
+    url: message.url,
+    createdAt: moment(message.createdAt).format("h:mm a"),
   });
   messages.insertAdjacentHTML("beforeend", html);
 });
@@ -37,7 +52,7 @@ form.addEventListener("submit", (e) => {
 
     text.focus();
 
-    console.log(data);
+    // console.log(data);
 
     //   if (error) {
     //   return console.log(error);

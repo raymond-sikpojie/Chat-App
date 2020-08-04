@@ -4,6 +4,10 @@ const http = require("http");
 const cors = require("cors");
 const socketio = require("socket.io");
 const Filter = require("bad-words");
+const {
+  generateMessage,
+  generateLocationMessage,
+} = require("./utils/messages");
 
 const app = express();
 app.use(cors());
@@ -23,11 +27,11 @@ const io = socketio(server);
 io.on("connection", (socket) => {
   console.log("New web socket connection");
 
-  socket.emit("message", "Welcome!");
+  socket.emit("message", generateMessage("Welcome"));
 
   // When a new user joins
   // socket.broadcast.emit send the message to other clients except the user
-  socket.broadcast.emit("message", "A new user has joined");
+  socket.broadcast.emit("message", generateMessage("A new user has joined"));
 
   // Send message upon form submit
   socket.on("sendMessage", (message, callback) => {
@@ -37,19 +41,24 @@ io.on("connection", (socket) => {
       return callback("Profanity is not allowed");
     }
 
-    io.emit("message", message);
+    io.emit("message", generateMessage(message));
     callback("Delivered!"); // "Delivered" argument is passed as "data" to the client
   });
 
   // Send location
   socket.on("sendLocation", ({ latitude, longitude }, callback) => {
-    io.emit("message", `https://google.com/maps?q=${latitude},${longitude}`);
+    io.emit(
+      "locationMessage",
+      generateLocationMessage(
+        `https://google.com/maps?q=${latitude},${longitude}`
+      )
+    );
     callback();
   });
 
   // When a socket disconnects
   socket.on("disconnect", () => {
-    io.emit("message", "A user has left");
+    io.emit("message", generateMessage("A user has left"));
   });
 });
 

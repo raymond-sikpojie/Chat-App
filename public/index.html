@@ -17,9 +17,17 @@
     </form>
     <button id="send-location">Send location</button>
 
+    <!-- Template script for messages -->
     <script id="message-template" type="text/html">
       <div>
-        <p>{{message}}</p>
+        <p>{{createdAt}} - {{message}}</p>
+      </div>
+    </script>
+
+    <!-- Template script for location -->
+    <script id="location-template" type="text/html">
+      <div>
+      <p>{{createdAt}} - <a href={{url}} target="_blank">My location</a></p>
       </div>
     </script>
 
